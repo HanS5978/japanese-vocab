@@ -301,9 +301,9 @@ function bindPw(after){
 /* ================= 發音（日文） ================= */
 let voice=null;
 /* 語速：正常鍵用選定的速度，🐢 再放慢到 65% */
-const SPEEDS=[0.55,0.7,0.85], SPEED_NAMES=["很慢","慢","標準"];
+const SPEEDS=[0.65,0.8,0.9], SPEED_NAMES=["慢","標準","快"];
 let speedLv = (()=>{ try{ const v=+localStorage.getItem("jvocab_speed"); return v>=0&&v<=2&&localStorage.getItem("jvocab_speed")!==null?v:1; }catch(e){ return 1; } })();
-const APP_VERSION="v4（11/14 放慢發音＋可調語速）";
+const APP_VERSION="v5（11/14 正常語速調為 0.8）";
 const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
 let voiceMode = (()=>{ try{ return localStorage.getItem("jvocab_voice_mode")||"auto"; }catch(e){ return "auto"; } })();   // auto | plain | pick
 function pickVoice(){ if(!("speechSynthesis" in window)) return;
