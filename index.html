@@ -303,7 +303,7 @@ let voice=null;
 /* 語速：正常鍵用選定的速度，🐢 再放慢到 65% */
 const SPEEDS=[0.65,0.8,0.9], SPEED_NAMES=["慢","標準","快"];
 let speedLv = (()=>{ try{ const v=+localStorage.getItem("jvocab_speed"); return v>=0&&v<=2&&localStorage.getItem("jvocab_speed")!==null?v:1; }catch(e){ return 1; } })();
-const APP_VERSION="v5（11/14 正常語速調為 0.8）";
+const APP_VERSION="v6（11/17 例句發音：慢速＋測驗答完可聽）";
 const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
 let voiceMode = (()=>{ try{ return localStorage.getItem("jvocab_voice_mode")||"auto"; }catch(e){ return "auto"; } })();   // auto | plain | pick
 function pickVoice(){ if(!("speechSynthesis" in window)) return;
@@ -410,7 +410,7 @@ function bindSpeak(root=app){
   root.querySelectorAll("[data-star]").forEach(b=>b.onclick=e=>{e.stopPropagation(); const k=b.dataset.star; S.stars[k]?delete S.stars[k]:S.stars[k]=1; save(); b.textContent=S.stars[k]?"★":"☆";});
 }
 function spk(x){ return `<button class="icon" data-say="${esc(x.r)}">🔊</button><button class="icon" data-slow="${esc(x.r)}">🐢</button><button class="icon star" data-star="${esc(K(x))}">${S.stars[K(x)]?"★":"☆"}</button>`; }
-function exBlock(x){ return x.ex?`<div class="ex"><div class="row"><div class="grow ja">${esc(x.ex)}</div><button class="icon" data-say="${esc(x.ex)}">🔊</button></div>${x.exZh?`<div class="zh2">${esc(x.exZh)}</div>`:""}</div>`:""; }
+function exBlock(x){ return x.ex?`<div class="ex"><div class="row"><div class="grow ja">${esc(x.ex)}</div><button class="icon" data-say="${esc(x.ex)}">🔊</button><button class="icon" data-slow="${esc(x.ex)}">🐢</button></div>${x.exZh?`<div class="zh2">${esc(x.exZh)}</div>`:""}</div>`:""; }
 
 /* ================= 首頁 ================= */
 function renderHome(){
@@ -590,6 +590,11 @@ function check(giveUp){
   if(ok){ if(!q.retry) q.score++; fb.innerHTML=`<div class="fb ok">✅ 正確！${word}${q.hints?`（用了 ${q.hints} 個提示）`:""}${near?`<div class="muted">注意長音：正確寫法是 ${esc(x.r)}</div>`:""}</div>`; }
   else{ if(!q.wrong.includes(x)) q.wrong.push(x);
     fb.innerHTML=`<div class="fb no">${giveUp?"答案是：":"❌ 正確讀音："}<div class="diff ja">${diffHTML(kana,x.r)}</div>${x.w!==x.r?`<div class="ja">${esc(x.w)}</div>`:""}${v.trim()&&!giveUp?`<div class="muted">你寫的：${esc(kana)}</div>`:""}</div>`; }
+  if(x.ex){   // 答完才顯示完整例句和例句發音（答題前播會洩漏答案）
+    const sp=findSpan(x), full = sp ? esc(x.ex.slice(0,sp[0]))+`<b style="color:var(--accent)">${esc(x.ex.slice(sp[0],sp[1]))}</b>`+esc(x.ex.slice(sp[1])) : esc(x.ex);
+    fb.insertAdjacentHTML("beforeend", `<div class="ex"><div class="row"><div class="grow ja">${full}</div><button class="icon" data-say="${esc(x.ex)}">🔊 例句</button><button class="icon" data-slow="${esc(x.ex)}">🐢</button></div></div>`);
+    bindSpeak(fb);
+  }
   speak(x.r);
   const btn=document.getElementById("check"); btn.textContent="下一題 →"; btn.onclick=next;
   document.getElementById("skip").style.display="none";
